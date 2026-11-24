@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import SitePage from "./Pages.jsx";
 import {
   Search, Menu, Bell, Settings, Bookmark, BookmarkCheck, ChevronDown,
   ArrowUpRight, Clock3, TrendingUp, X, Share2, Globe2, Check,
@@ -20,6 +21,7 @@ const defaultPrefs = {all:true,World:true,Politics:true,Sports:true,Entertainmen
 
 function App(){
   const [section,setSection] = useState("For you");
+  const [page,setPage] = useState("home");
   const [search,setSearch] = useState("");
   const [saved,setSaved] = useState([]);
   const [showSaved,setShowSaved] = useState(false);
@@ -57,7 +59,7 @@ function App(){
   return <div className={"app "+(reading==="Compact"?"compact":"")}>
     <header className="topbar">
       <button className="icon-btn mobile-menu" aria-label="Open navigation" onClick={()=>setMobileNav(!mobileNav)}><Menu size={20}/></button>
-      <a className="brand" href="#" onClick={()=>{setSection("For you");setShowSaved(false)}}><span className="brand-mark">6</span><span>618<span className="brand-light">TRENDS</span><small>NEWS THAT MOVES YOU</small></span></a>
+      <a className="brand" href="#" onClick={e=>{e.preventDefault();setPage("home");setSection("For you");setShowSaved(false)}}><span className="brand-mark">6</span><span>618<span className="brand-light">TRENDS</span><small>NEWS THAT MOVES YOU</small></span></a>
       <div className="top-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search stories, topics, people..." /><kbd>⌘ K</kbd></div>
       <div className="top-actions">
         <button className={"icon-btn "+(showSaved?"active":"")} title="Saved stories" onClick={()=>{setShowSaved(!showSaved);setSection("For you")}}>{showSaved?<BookmarkCheck size={19}/>:<Bookmark size={19}/>}</button>
@@ -75,10 +77,11 @@ function App(){
         <div className="side-divider"/>
         <button className={"nav-item "+(showSaved?"selected":"")} onClick={()=>{setShowSaved(true);setSection("For you");setMobileNav(false)}}><Bookmark size={18}/><span>Saved stories</span><span className="nav-count">{saved.length}</span></button>
         <div className="sidebar-card"><div className="sidebar-card-icon"><Bell size={17}/></div><strong>Your news, your way.</strong><p>Choose the topics you care about and get notified when they matter.</p><button onClick={()=>setSettings(true)}>Personalize feed <ArrowUpRight size={14}/></button></div>
-        <div className="sidebar-footer"><span>© 2026 618TRENDS</span><span>Independent perspective.</span></div>
+        <div className="side-page-links"><button onClick={()=>{setPage("trending");setMobileNav(false)}}><TrendingUp size={15}/> Trending</button><button onClick={()=>{setPage("about");setMobileNav(false)}}><Newspaper size={15}/> About 618TRENDS</button><button onClick={()=>{setPage("contact");setMobileNav(false)}}><CircleUserRound size={15}/> Contact</button><button onClick={()=>{setPage("newsletter");setMobileNav(false)}}><Bell size={15}/> Newsletter</button></div><div className="sidebar-footer"><span>© 2026 618TRENDS</span><span>Independent perspective.</span></div>
       </aside>
 
       <main className="content">
+        {page==="home" ? <>
         <div className="welcome-row"><div><div className="eyebrow"><span className="eyebrow-line"/> TUESDAY EDITION <span className="eyebrow-line"/></div><h1>{showSaved?"Your saved stories":section==="For you"?"Stay ahead of the story.":section+" / The latest"}</h1><p className="welcome-sub">{showSaved?"Stories you’ve bookmarked to read later.":"The news that matters, with context that makes it clearer."}</p></div><button className="settings-shortcut" onClick={()=>setSettings(true)}><SlidersHorizontal size={16}/> Customize <ChevronDown size={14}/></button></div>
 
         {!showSaved&&!search&&section==="For you"&&<section className="hero-grid">
@@ -95,6 +98,7 @@ function App(){
         {filtered.length===0?<div className="empty-state"><Bookmark size={28}/><h3>{showSaved?"No saved stories yet":"No stories found"}</h3><p>{showSaved?"Tap the bookmark icon on any story to keep it here.":"Try another search or choose a different section."}</p><button onClick={()=>{setSearch("");setShowSaved(false);setSection("For you")}}>Back to top stories</button></div>:<div className="story-grid">{filtered.map((s,i)=><article className="story-card" key={s.id}><div className="card-image" style={{backgroundImage:"url("+s.image+")"}} onClick={()=>setActiveStory(s)}><span className="image-tag">{s.tag}</span><button className="save-btn" aria-label="Save story" onClick={e=>{e.stopPropagation();toggleSave(s.id)}}>{saved.includes(s.id)?<BookmarkCheck size={17}/>:<Bookmark size={17}/>}</button></div><div className="card-body"><span className="category-label">{s.section}</span><h3 onClick={()=>setActiveStory(s)}>{s.title}</h3><p>{s.summary}</p><div className="card-bottom"><span>{s.author}</span><span><Clock3 size={12}/> {s.time}</span></div></div></article>)}</div>}
         <div className="sample-note"><span className="note-icon">i</span> <span>Preview edition: sample headlines and timestamps. Connect a trusted news source to publish live updates.</span></div>
         <footer className="main-footer"><span>618TRENDS <b>•</b> News that moves you.</span><span>Curious minds. Clear perspectives.</span></footer>
+        </> : <SitePage page={page} onNavigate={setPage} stories={stories} onStory={setActiveStory}/> }
       </main>
     </div>
 
